@@ -12,21 +12,17 @@ showmsg() {
 }
 
 showmsg "Preparing virtual-machine"
+sudo apt-get update --fix-missing
+    && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+    && sudo apt-get autoremove -y
+sudo apt-get install -y apt-transport-https build-essential software-properties-common
 # add Ondřej Sury's Debian PHP repo
 sudo wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
-sudo sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+    && sudo sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+    && sudo apt-get update
 
 showmsg "--- Reticulating splines"
-sudo apt-get update --fix-missing
-sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-sudo apt-get autoremove -y
-sudo apt-get install -y vim-nox curl unzip apt-transport-https build-essential software-properties-common
-
-showmsg "--- Installing Nginx"
-sudo apt-get install -y nginx-full
-# disable sendfile, which causes file corruption in virtualbox vms
-sudo sed -i "s/sendfile on/sendfile off/" /etc/nginx/nginx.conf
-sudo rm /etc/nginx/sites-enabled/default
+sudo apt-get install -y vim-nox curl unzip
 
 showmsg "--- Installing PHP7.x-fpm and indispensable packages"
 sudo apt-get install -y php7.3-fpm php7.3-curl php7.3-intl php7.3-mbstring php7.3-mysql php7.3-zip
@@ -36,6 +32,12 @@ sudo sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.3/fpm/php.ini
 sudo sed -i "s/;date.timezone =/date.timezone = America\/Denver/" /etc/php/7.3/cli/php.ini
 sudo sed -i "s/;date.timezone =/date.timezone = America\/Denver/" /etc/php/7.3/fpm/php.ini
 sudo service php7.3-fpm reload
+
+showmsg "--- Installing Nginx"
+sudo apt-get install -y nginx-full
+# disable sendfile, which causes file corruption in virtualbox vms
+sudo sed -i "s/sendfile on/sendfile off/" /etc/nginx/nginx.conf
+sudo rm /etc/nginx/sites-enabled/default
 
 showmsg "--- Installing Composer"
 curl --silent https://getcomposer.org/installer | php >> /vagrant/vm_build.log
